@@ -1,3 +1,6 @@
+#! /usr/bin/env ansible-playbook
+---
+# install and configure nginx server
 - name:  Configure webserver with nginx
   hosts:  webservers
   become: true
@@ -19,6 +22,7 @@
            dest=/usr/share/nginx/html/index.html
         - name: restart nginx
           ansible.builtin.service:  name=nginx state=restarted
+...
 
             
       
