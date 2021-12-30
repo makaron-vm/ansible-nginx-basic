@@ -10,13 +10,13 @@
            dest: /etc/nginx/sites-available/default
         - name:  enable nginx configration
           file:  >
-           dest: /etc/nginx/sites-enabled/default
-           src: /etc/nginx/sites-available/default
-           state: link
+           dest=/etc/nginx/sites-enabled/default
+           src=/etc/nginx/sites-available/default
+           state=link
         - name:  copy index.html
-          ansible.builtin.tempfile: >
-           src: index.html.j2
-           dest: /usr/share/nginx/html/index.html
+          template: >
+           src=index.html.j2
+           dest=/usr/share/nginx/html/index.html
         - name: restart nginx
           ansible.builtin.service:  name=nginx state=restarted
 
