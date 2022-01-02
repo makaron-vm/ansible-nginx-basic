@@ -1,32 +1,36 @@
-#! /usr/bin/env ansible-playbook
 ---
-# install and configure nginx server
 - name:  Configure webserver with nginx
   hosts:  webservers
   become: true
+  vars:
+    tls_dir:  /etc/nginx/ssl
+    key_file: nginx.key
+    cert_file: nginx.cert
+    conf_file: /etc/nginx/sites-available/default
+    server_name: localhost
   tasks:
-        - name: Install nginx
-          package:
-            name: nginx
-            update_cache:  true
-        - name:  copy nginx config file 
-          copy:
-           src: nginx.conf
-           dest: /etc/nginx/sites-available/default
-        - name:  enable nginx configration
-          file: 
-            dest: /etc/nginx/sites-enabled/default
-            src: /etc/nginx/sites-available/default
-            state: link
-        - name:  copy index.html
-          template: 
-            src: index.html.j2
-            dest: /usr/share/nginx/html/index.html
-        - name: restart nginx
-          service: 
-             name: nginx
-             state: restarted
-...
-
-            
-      
+   - name: Install nginx
+     package:
+       name: nginx
+       update_cache:  true
+   - name: install nginx config template
+     template:
+      src: nginx.conf.j2
+      dest:  "{{ conf_file }}"
+      mode: 0644
+     notify:  restart nginx
+   - name:  enable nginx configration
+     file: 
+      dest: /etc/nginx/sites-enabled/default
+      src: /etc/nginx/sites-available/default
+      state: link
+   - name:  copy index.html
+     template: 
+      src: index.html.j2
+      dest: /usr/share/nginx/html/index.html
+      mode: 0644
+  handlers: 
+   - name:  restart nginx
+     service:
+      name: nginx
+      state: restart
