@@ -1,4 +1,5 @@
 ---
+
 - name:  Configure webserver with nginx
   hosts:  webservers
   become: true
@@ -8,29 +9,59 @@
     cert_file: nginx.cert
     conf_file: /etc/nginx/sites-available/default
     server_name: localhost
+
+  handlers: 
+   - name:  restart nginx
+     service:
+      name: nginx
+      state: restart
+      
   tasks:
    - name: Install nginx
      package:
        name: nginx
        update_cache:  true
+     notify: restart nginx
+    
+   - name: Create directory for certs
+     file:
+       path: {{ tls_dir }}
+       state: directory
+       mode: 0750
+     notify: restart nginx
+    
+   - name: copy certs
+     copy:
+       src: {{ item }}
+       dest: {{tls_dir}}
+       mode: 0600
+     loop:
+        - "{{ key_file }}"
+        - "{{cert_file}}"
+
    - name: install nginx config template
      template:
       src: nginx.conf.j2
       dest:  "{{ conf_file }}"
       mode: 0644
      notify:  restart nginx
-   - name:  enable nginx configration
-     file: 
-      dest: /etc/nginx/sites-enabled/default
-      src: /etc/nginx/sites-available/default
-      state: link
+  
    - name:  copy index.html
      template: 
       src: index.html.j2
       dest: /usr/share/nginx/html/index.html
       mode: 0644
-  handlers: 
-   - name:  restart nginx
-     service:
-      name: nginx
-      state: restart
+   - name:  "Test it! https://localhost:8443/index.html"
+     delegate_to: localhost
+     become: false
+     uri:
+       url: 'https://localhost:8443/index.html'
+       validate_certs: false
+       return_content: true
+     register: this
+     failed_when: "'Running on ' not in this.content"
+     tags:
+       - Test
+
+
+...
