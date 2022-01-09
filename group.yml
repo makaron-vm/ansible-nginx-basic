@@ -1,0 +1,26 @@
+---
+- name: group host by distribution
+  hosts: vagrant
+  gather_facts: true
+  tasks:
+    - name: sort by group
+      group_by:
+        key: "{{ ansible_distribution }}"
+    - name: show variables
+      debug: var=ansible_distribution
+- name: Install JRE on ubuntu
+  hosts: ubuntu
+  tasks:
+    - name: Install java
+      apt:
+        name:
+          - openjdk-11-jre-headless
+- name: Install JRE fedora
+  hosts: fedora
+  tasks:
+    - name: install java fedora
+      yum:
+        name:
+          - java-11-openjdk-headless
+
+...

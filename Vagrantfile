@@ -11,4 +11,10 @@ Vagrant.configure("2") do |config|
     node.vm.network "forwarded_port", id:"https",guest: 443, host: "844#{i}", host_ip: "127.0.0.1"
     end
   end
+
+  config.vm.define "fedora" do |fedora|
+
+    fedora.vm.box = "generic/fedora28"
+  end
+  
 end
